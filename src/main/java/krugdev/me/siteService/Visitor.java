@@ -8,8 +8,15 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 
 @Entity
+@NamedQuery(
+		name = "findSiteVisitorsByPeriod",
+		query= "Select v from Visitor v "
+				+ "where v.visitedSite = :site "
+				+ "and v.visitDate >= :startDate "
+				+ "and v.visitDate <= :endDate")
 public class Visitor {
 	
 	@Id
@@ -24,14 +31,13 @@ public class Visitor {
 	private String membershipId;
 	private BigDecimal visitPrice;
 	
-	public Visitor() {}
+	protected Visitor() {}
 
 	public static class Builder {
 		// required parameters
 		private final LocalDate visitDate;
 		private final Site visitedSite;
 		
-
 		// optional parameters
 		private VisitorType visitorType = VisitorType.ADULT;
 		private String membershipId = "";

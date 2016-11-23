@@ -1,47 +1,61 @@
 package krugdev.me.siteService;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 import krugdev.me.membershipService.MembershipService;
 
-
 @Entity
+@NamedQueries({
 @NamedQuery(
 	name = "findSiteByName",
-	query= "Select s from Site s where s.name = :name")
-public class Site {
-
+	query= "Select s from Site s where s.name = :name"),
+@NamedQuery(
+		name = "findSiteByChargingStructure",
+		query= "Select s from Site s where s.chargingStructure = :chargingStructure")
+})
+public class Site  {
+	
 	@Id
 	@GeneratedValue
 	private int id;
 	private String name;
 	@OneToMany(mappedBy="visitedSite", fetch = FetchType.EAGER)
 	private Collection<Visitor> visitors = new HashSet<>();
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name="STRUCTURE_ID")
+	private ChargingStructure chargingStructure;
 	
 	@Transient
 	private SiteDBService dbService;
 	@Transient
 	private MembershipService membershipService;
+
+	
 	
 	// required by the JPA
-	public Site() {}
+	protected Site() {}
 	
 	private Site(String name, SiteDBService dbService) {
 		this.name = name;
 		setDbService(dbService);
 		
 	}
-	
 
 	/**
 	 * 
@@ -58,6 +72,7 @@ public class Site {
 			site.setDbService(dbService);
 		} else {
 			site = new Site(name, dbService);
+			dbService.persist(site);
 		}
 		return site;
 	}
@@ -87,6 +102,34 @@ public class Site {
 		}
 	}
 	
+	public void setMembershipService(MembershipService membershipService) {
+		this.membershipService = membershipService;
+	}
+
+	public void setCharginStructure(ChargingStructure chargingStructure) {
+		if (this.chargingStructure == null) {
+			instaniateChargingStructure(chargingStructure);
+		} else {
+			replaceChargingStructure(chargingStructure);
+		}
+	}
+	
+	private void instaniateChargingStructure(ChargingStructure newStructure) {
+		this.chargingStructure = newStructure;
+		dbService.update(this);
+	}
+	
+	// replaces in database old ChargingStructure by the new one 
+	private void replaceChargingStructure(ChargingStructure newStructure){
+		ChargingStructure structureToRemoveFromDB = this.chargingStructure;
+		instaniateChargingStructure(newStructure);
+		dbService.remove(structureToRemoveFromDB);
+	}
+
+	public ChargingStructure getChargingStructure() {
+		return chargingStructure;
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -95,7 +138,8 @@ public class Site {
 		return visitors.size();
 	}
 	
-	public void setMembershipService(MembershipService membershipService) {
-		this.membershipService = membershipService;
+	public int getVisitorsCountForPeriod(LocalDate startDate, LocalDate endDate) {
+		List<Visitor> visitors = dbService.findVisitors(this, startDate, endDate);
+		return visitors.size();
 	}
 }

@@ -2,6 +2,7 @@ package krugdev.me.siteService;
 
 import java.math.BigDecimal;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -11,6 +12,7 @@ public class ChargingStructure {
 	
 	@Id
 	@GeneratedValue
+	@Column(name = "STRUCTURE_ID")
 	private int id;
 	private BigDecimal adultMember;
 	private BigDecimal adultNoMember;
@@ -21,7 +23,8 @@ public class ChargingStructure {
 	private BigDecimal familyAdultNoMember;
 	private BigDecimal familyChildNoMember;
 	
-	public ChargingStructure() {}
+	// required by JPA
+	protected ChargingStructure() {}
 	
 	public static class Builder {
 		private BigDecimal adultMember = BigDecimal.ZERO;
