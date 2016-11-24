@@ -18,6 +18,7 @@ public class RegionUnitTest {
 	Region region = new Region(ANY_REGION_NAME);
 	RegionSite ANY_REGION_SITE = mock(RegionSite.class);
 	LocalDate END_OF_THE_YEAR_DATE = LocalDate.of(2016, 12, 31);
+	MarketingCampaign ANY_MARKETING_CAMPAIGN = mock(MarketingCampaign.class);
 	
 	@Test
 	public void shouldSetRegionName() {
@@ -46,9 +47,7 @@ public class RegionUnitTest {
 		assertTrue(region.getSites().size() == 0);
 	}
 	
-	public Object[] getBronzeCount() {
-		return new Integer[] {0, 20, 9999, 5000};
-	}
+	
 	
 	public Object[] getDatesWhichAreNotEndOfTheYear() {
 		return new LocalDate[] {
@@ -66,74 +65,48 @@ public class RegionUnitTest {
 	}
 	
 	@Test
-	@Parameters(method = "getBronzeCount")
-	public void shouldRateSiteBRONZEbasedOnPopularity(int bronzeVisitorsCount) {
-		when(ANY_REGION_SITE.getSiteVisitorsCount(END_OF_THE_YEAR_DATE)).thenReturn(bronzeVisitorsCount);
-		region.addSite(ANY_REGION_SITE);				
-		region.tagSites(END_OF_THE_YEAR_DATE);
-		
-		verify(ANY_REGION_SITE).setRating(SiteRating.BRONZE);
-	}
-	
-	public Object[] getSilverCount() {
-		return new Integer[] {10000, 29999, 15000, 24976};
-	}
-	
-	@Test
-	@Parameters(method = "getSilverCount")
-	public void shouldRateSiteSILVERbasedOnPopularity(int silverVisitorsCount) {
-		when(ANY_REGION_SITE.getSiteVisitorsCount(END_OF_THE_YEAR_DATE)).thenReturn(silverVisitorsCount);
-		region.addSite(ANY_REGION_SITE);				
-		region.tagSites(END_OF_THE_YEAR_DATE);
-		
-		verify(ANY_REGION_SITE).setRating(SiteRating.SILVER);
-	}
-	
-	public Object[] getGoldCount() {
-		return new Integer[] {30000, 100000, 56987};
-	}
-	
-	@Test
-	@Parameters(method = "getGoldCount")
-	public void shouldRateSiteGOLDbasedOnPopularity(int goldVisitorsCount) {
-		when(ANY_REGION_SITE.getSiteVisitorsCount(END_OF_THE_YEAR_DATE)).thenReturn(goldVisitorsCount);
-		region.addSite(ANY_REGION_SITE);				
-		region.tagSites(END_OF_THE_YEAR_DATE);
-		
-		verify(ANY_REGION_SITE).setRating(SiteRating.GOLD);
-	}
-	
-	public Object[] getCountLessThanTarget() {
-		return new Integer[] {0, 14999, 5698};
-	}
-	
-	@Test
-	@Parameters(method = "getCountLessThanTarget")
-	public void shouldMarkSiteForCampaingIfTargetNotMet(int visitorCountLessThenTarget) {
-		int siteTarget = 15000;
-		when(ANY_REGION_SITE.getSiteVisitorsCount(END_OF_THE_YEAR_DATE)).thenReturn(visitorCountLessThenTarget);
-		when(ANY_REGION_SITE.getVisitorsTarget()).thenReturn(siteTarget);
+	public void shouldReplaceSiteByNewAfterTaging() {
 		region.addSite(ANY_REGION_SITE);
+		RegionSite newEvaluatedSite = mock(RegionSite.class);
+		when(ANY_REGION_SITE.evaluateAtTheEndOfTheYear(END_OF_THE_YEAR_DATE)).thenReturn(newEvaluatedSite);
 		region.tagSites(END_OF_THE_YEAR_DATE);
-		
-		verify(ANY_REGION_SITE).setPriorityForMarketingCampaigh();
+		assertEquals(newEvaluatedSite, region.getSites().iterator().next());
 	}
-
-	public Object[] getCountMoreThanTarget() {
-		return new Integer[] {15000, 100000, 25438};
-	}
-
+	
+	
 	@Test
-	@Parameters(method = "getCountMoreThanTarget")
-	public void shouldNotMarkSiteForCampaignIfTargetMet(int visitorCountMoreThenTarget) {
-		int siteTarget = 15000;
-		when(ANY_REGION_SITE.getSiteVisitorsCount(END_OF_THE_YEAR_DATE)).thenReturn(visitorCountMoreThenTarget);
-		when(ANY_REGION_SITE.getVisitorsTarget()).thenReturn(siteTarget);
-		region.addSite(ANY_REGION_SITE);
-		region.tagSites(END_OF_THE_YEAR_DATE);
-		
-		verify(ANY_REGION_SITE, never()).setPriorityForMarketingCampaigh();
+	public void shouldAddMarketingCampaign() {
+		region.addMarketingCampaign(ANY_MARKETING_CAMPAIGN);
+		assertTrue(region.getMarketingCampaigns().size() == 1);
 	}
 	
+	@Test
+	public void shouldAddManyCampaigns() {
+		MarketingCampaign campaign1 = mock(MarketingCampaign.class);
+		region.addMarketingCampaign(campaign1);
+		region.addMarketingCampaign(ANY_MARKETING_CAMPAIGN);
+		assertTrue(region.getMarketingCampaigns().size() == 2);
+	}
 	
+	@Test
+	public void shouldReturnTheLastCampaign() {
+		shouldAddManyCampaigns();
+		assertEquals(ANY_MARKETING_CAMPAIGN, region.getLastMarketingCampaign());
+	}
+	
+	@Test
+	public void shouldReplaceCampaign() {
+		shouldAddManyCampaigns();
+		MarketingCampaign replacementCampaign = mock(MarketingCampaign.class);
+		region.replaceMarketingCampaign(ANY_MARKETING_CAMPAIGN, replacementCampaign);
+		assertEquals(replacementCampaign, region.getLastMarketingCampaign());
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void shouldThrowIllegalArgumentExcIfCampaignToBeReplaceCantBeFound() {
+		shouldAddManyCampaigns();
+		MarketingCampaign notExistingCampaign = mock(MarketingCampaign.class);
+		MarketingCampaign replacementCampaign = mock(MarketingCampaign.class);
+		region.replaceMarketingCampaign(notExistingCampaign, replacementCampaign);
+	}
 }
