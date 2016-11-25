@@ -34,14 +34,36 @@ public class Region {
 		return true;
 	}
 	
+	public Collection<RegionSite> getPrioritySites() {
+		List<RegionSite> prioritySites = new ArrayList<>();
+		List<RegionSite> sitesNotInLastCampaign = getSitesNotInLastCampaign();
+		sitesNotInLastCampaign.stream().forEach(v -> {
+			if(v.isPriorityForCampaing()) {
+				prioritySites.add(v);
+			}
+		});
+		return prioritySites;
+	}	
 	
-	public void replaceMarketingCampaign(MarketingCampaign campaingToBeReplace,
-			MarketingCampaign replacementCampaign) {
-		int indexOfcampaignToBeReplaced = campaigns.indexOf(campaingToBeReplace);
-		if(indexOfcampaignToBeReplaced == -1) {// campaign is not found
-			throw new IllegalArgumentException("Can't find the campaing to be replace");
-		}
-		campaigns.set(indexOfcampaignToBeReplaced, replacementCampaign);
+	public Collection<RegionSite> getNonPrioritySites() {
+		List<RegionSite> nonPrioritySites = new ArrayList<>();
+		List<RegionSite> sitesNotInLastCampaign = getSitesNotInLastCampaign();
+		sitesNotInLastCampaign.stream().forEach(v -> {
+			if(!v.isPriorityForCampaing()) {
+				nonPrioritySites.add(v);
+			}
+		});
+		return nonPrioritySites;
+	}
+	
+	private List<RegionSite> getSitesNotInLastCampaign() {
+		List<RegionSite> sitesNotInLastCampaign = new ArrayList<>();
+		regionSites.stream().forEach(v -> {
+			if(!v.getLastMarketingCampaign().equals(getLastMarketingCampaign())) {
+				sitesNotInLastCampaign.add(v);
+			}
+		});
+		return sitesNotInLastCampaign;
 	}
 
 	public void addMarketingCampaign(MarketingCampaign campaign) {
@@ -71,7 +93,9 @@ public class Region {
 	public void removeSite(RegionSite regionSite) {
 		regionSites.remove(regionSite);
 	}
-
 	
-	
+	public void replaceSite(RegionSite oldSite, RegionSite newSite) {
+		regionSites.remove(oldSite);
+		regionSites.add(newSite);
+	}
 }

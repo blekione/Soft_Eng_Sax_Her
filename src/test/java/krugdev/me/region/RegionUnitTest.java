@@ -4,6 +4,9 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -95,18 +98,66 @@ public class RegionUnitTest {
 	}
 	
 	@Test
-	public void shouldReplaceCampaign() {
-		shouldAddManyCampaigns();
-		MarketingCampaign replacementCampaign = mock(MarketingCampaign.class);
-		region.replaceMarketingCampaign(ANY_MARKETING_CAMPAIGN, replacementCampaign);
-		assertEquals(replacementCampaign, region.getLastMarketingCampaign());
+	public void shouldReturnSitesValidForCampaign() {
+		MarketingCampaign notLastRegionCampaign = mock(MarketingCampaign.class);
+		MarketingCampaign lastRegionCampaign = mock(MarketingCampaign.class);
+		
+		region.addMarketingCampaign(notLastRegionCampaign);
+		region.addMarketingCampaign(lastRegionCampaign);
+	
+		RegionSite prioritySiteA = mock(RegionSite.class, "prioritSiteA");
+		RegionSite prioritySiteB = mock(RegionSite.class, "prioritySiteB");
+		RegionSite prioritySiteInLastCampaign = mock(RegionSite.class, "prioritySiteInlastCampaign");
+		RegionSite siteA = mock(RegionSite.class, "siteA");
+		RegionSite siteB = mock(RegionSite.class, "siteB");
+		RegionSite siteInLastCampaign = mock(RegionSite.class, "siteInLastCampaign");
+		
+		// set return values from RegionSites for priority in next campaign
+		
+		when(prioritySiteA.isPriorityForCampaing()).thenReturn(true);
+		when(prioritySiteB.isPriorityForCampaing()).thenReturn(true);
+		when(prioritySiteInLastCampaign.isPriorityForCampaing()).thenReturn(true);
+		when(siteA.isPriorityForCampaing()).thenReturn(false);
+		when(siteB.isPriorityForCampaing()).thenReturn(false);
+		when(siteInLastCampaign.isPriorityForCampaing()).thenReturn(false);
+		
+		// set return value of lastCampaing for RegionSite
+		
+		when(prioritySiteA.getLastMarketingCampaign()).thenReturn(Optional.of(notLastRegionCampaign));
+		when(prioritySiteB.getLastMarketingCampaign()).thenReturn(Optional.of(notLastRegionCampaign));
+		when(prioritySiteInLastCampaign.getLastMarketingCampaign()).thenReturn(Optional.of(lastRegionCampaign));
+		when(siteA.getLastMarketingCampaign()).thenReturn(Optional.of(notLastRegionCampaign));
+		when(siteB.getLastMarketingCampaign()).thenReturn(Optional.of(notLastRegionCampaign));
+		when(siteInLastCampaign.getLastMarketingCampaign()).thenReturn(Optional.of(lastRegionCampaign));
+		
+		// create collections which will assert against
+		List<RegionSite> priorityNotInLastCampaign = Arrays.asList(prioritySiteA, prioritySiteB);
+		List<RegionSite> notInLastCampaign = Arrays.asList(siteA, siteB);
+		
+		// add all region sites to region
+		region.addSite(prioritySiteA);
+		region.addSite(prioritySiteB);
+		region.addSite(prioritySiteInLastCampaign);
+		region.addSite(siteA);
+		region.addSite(siteB);
+		region.addSite(siteInLastCampaign);
+
+		assertTrue(region.getPrioritySites().containsAll(priorityNotInLastCampaign));
+		assertTrue(region.getNonPrioritySites().containsAll(notInLastCampaign));
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
-	public void shouldThrowIllegalArgumentExcIfCampaignToBeReplaceCantBeFound() {
-		shouldAddManyCampaigns();
-		MarketingCampaign notExistingCampaign = mock(MarketingCampaign.class);
-		MarketingCampaign replacementCampaign = mock(MarketingCampaign.class);
-		region.replaceMarketingCampaign(notExistingCampaign, replacementCampaign);
+	@Test
+	public void shouldReplaceSite() {
+		RegionSite anySite = mock(RegionSite.class);
+		RegionSite oldSite = mock(RegionSite.class, "oldSite");
+		RegionSite newSite = mock(RegionSite.class, "newSite");
+		
+		region.addSite(anySite);
+		region.addSite(oldSite);
+		region.replaceSite(oldSite, newSite);
+		
+		assertTrue(region.getSites().contains(newSite));
+		assertFalse(region.getSites().contains(oldSite));
+
 	}
 }

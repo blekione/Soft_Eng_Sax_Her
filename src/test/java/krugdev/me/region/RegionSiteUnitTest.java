@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +37,7 @@ public class RegionSiteUnitTest {
 		assertEquals(defaultRating, regionSite.getRating());
 		assertEquals(defaultVisitorsTarget, regionSite.getVisitorsTarget());
 		assertFalse(regionSite.isPriorityForCampaing());
+		assertTrue(regionSite.getMarketingCampaigns().isEmpty());
 	}
 	
 	public Object[] getRatings() {
@@ -59,6 +62,38 @@ public class RegionSiteUnitTest {
 	public void builderShouldBUildRegionSiteWithSetPriorityForCampaign() {
 		RegionSite regionSite = builder.campaignPriority().build();
 		assertTrue(regionSite.isPriorityForCampaing());
+	}
+	
+	@Test
+	public void builderShouldBuildRegionSiteWithCampaign() {
+		MarketingCampaign campaign = mock(MarketingCampaign.class);
+		RegionSite regionSite = builder.marketingCampaign(campaign).build();
+		assertTrue(regionSite.getMarketingCampaigns().size() == 1);
+	}
+	
+	@Test
+	public void builderShouldBuildRegionSiteWithCollectionOfCampaigns() {
+		MarketingCampaign campaignA = mock(MarketingCampaign.class);
+		MarketingCampaign campaignB = mock(MarketingCampaign.class);
+		List<MarketingCampaign> campaigns = new ArrayList<>();
+			campaigns.add(campaignA);
+			campaigns.add(campaignB);
+		RegionSite regionSite = builder.marketingCampaigns(campaigns).build();
+		assertTrue(regionSite.getMarketingCampaigns().size() == 2);
+	}
+	
+	@Test
+	public void shouldReturnLastCampaign() {
+		MarketingCampaign campaignA = mock(MarketingCampaign.class);
+		MarketingCampaign campaignB = mock(MarketingCampaign.class);
+		RegionSite regionSite = builder.marketingCampaign(campaignA).marketingCampaign(campaignB).build();
+		assertEquals(campaignB, regionSite.getLastMarketingCampaign().get());
+	}
+	
+	@Test
+	public void shouldReturnEmptyOptionalIfSiteHasNoCampaigns() {
+		RegionSite regionSite = builder.build();
+		assertFalse(regionSite.getLastMarketingCampaign().isPresent());
 	}
 	
 	public Object[] getDifferentVisitorsCount() {

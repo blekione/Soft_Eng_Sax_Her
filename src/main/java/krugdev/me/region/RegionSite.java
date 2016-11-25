@@ -1,6 +1,9 @@
 package krugdev.me.region;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import krugdev.me.siteService.Site;
 
@@ -13,6 +16,7 @@ public class RegionSite {
 	private SiteRating rating;
 	private boolean priorityForCampaign;
 	private int visitorsTarget;
+	private List<MarketingCampaign> marketingCampaigns;
 
 	public static class Builder {
 		private final Site site;
@@ -22,6 +26,7 @@ public class RegionSite {
 		private SiteRating rating = SiteRating.BRONZE;
 		private boolean priorityForCampaign = false;
 		private int visitorsTarget = 1000;
+		private List<MarketingCampaign> marketingCampaigns = new ArrayList<>();
 		
 		public Builder(Site site, SiteType type, Region region) {
 			this.site = site;
@@ -47,6 +52,16 @@ public class RegionSite {
 			this.priorityForCampaign = true;
 			return this;
 		}
+
+		public Builder marketingCampaign(MarketingCampaign campaign) {
+			this.marketingCampaigns.add(campaign);
+			return this;
+		}
+
+		public Builder marketingCampaigns(List<MarketingCampaign> campaigns) {
+			this.marketingCampaigns = campaigns;
+			return this;
+		}
 	}
 	
 	private RegionSite(Builder builder) {
@@ -56,6 +71,7 @@ public class RegionSite {
 		this.rating = builder.rating;
 		this.priorityForCampaign = builder.priorityForCampaign;
 		this.visitorsTarget = builder.visitorsTarget;
+		this.marketingCampaigns = builder.marketingCampaigns;
 	}
 	
 	public RegionSite evaluateAtTheEndOfTheYear(LocalDate endDate) {
@@ -117,5 +133,16 @@ public class RegionSite {
 
 	public boolean isPriorityForCampaing() {
 		return priorityForCampaign;
+	}
+
+	public List<MarketingCampaign> getMarketingCampaigns() {
+		return marketingCampaigns;
+	}
+
+	public Optional<MarketingCampaign> getLastMarketingCampaign() {
+		if (marketingCampaigns.size() >= 1) {
+		return Optional.of(marketingCampaigns.get(marketingCampaigns.size() - 1));	
+		}
+		return Optional.empty();
 	}
 }
