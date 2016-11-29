@@ -25,7 +25,7 @@ public class SiteUnitTest {
 	@Before
 	public void setUp() {
 		membershipService = mock(MembershipService.class);
-		when(DB_SERVICE.getSite(SITE_NAME)).thenReturn(Optional.empty());
+		when(DB_SERVICE.getEntity(SITE_NAME)).thenReturn(Optional.empty());
 		site  = Site.instanceOf(SITE_NAME, DB_SERVICE);
 		site.setMembershipService(membershipService);
 	}
@@ -41,7 +41,7 @@ public class SiteUnitTest {
 		Visitor visitorA = mock(Visitor.class, "visitorA");
 		Visitor visitorB = mock(Visitor.class, "visitorB");
 		site.addVisitor(visitorA);
-		site.addVisitor(visitorB);	
+		site.addVisitor(visitorB);
 		assertEquals(2, site.getVisitorsCount());
 	}
 	

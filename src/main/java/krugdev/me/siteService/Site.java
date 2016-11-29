@@ -12,11 +12,15 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import krugdev.me.membershipService.MembershipService;
 
@@ -33,16 +37,21 @@ public class Site  {
 	
 	@Id
 	@GeneratedValue
-	private int id;
+	private int siteId;
+	
 	private String name;
+	
 	@OneToMany(mappedBy="visitedSite", fetch = FetchType.EAGER)
+	@Fetch(FetchMode.SELECT)
 	private Collection<Visitor> visitors = new HashSet<>();
+	
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="STRUCTURE_ID")
 	private ChargingStructure chargingStructure;
 	
 	@Transient
 	private SiteDBService dbService;
+	
 	@Transient
 	private MembershipService membershipService;
 
@@ -66,7 +75,7 @@ public class Site  {
 	 */
 	public static Site instanceOf(String name, SiteDBService dbService) {
 		Site site;
-		Optional<Site> optionalSite = dbService.getSite(name);
+		Optional<Site> optionalSite = dbService.getEntity(name);
 		if (optionalSite.isPresent()) {
 			site = optionalSite.get();
 			site.setDbService(dbService);
@@ -75,10 +84,6 @@ public class Site  {
 			dbService.persist(site);
 		}
 		return site;
-	}
-	
-	private void setDbService(SiteDBService dbService) {
-		this.dbService = dbService;		
 	}
 	
 	/**
@@ -104,6 +109,10 @@ public class Site  {
 	
 	public void setMembershipService(MembershipService membershipService) {
 		this.membershipService = membershipService;
+	}
+	
+	public void setDbService(SiteDBService dbService) {
+		this.dbService = dbService;		
 	}
 
 	public void setCharginStructure(ChargingStructure chargingStructure) {
@@ -141,5 +150,13 @@ public class Site  {
 	public int getVisitorsCountForPeriod(LocalDate startDate, LocalDate endDate) {
 		List<Visitor> visitors = dbService.findVisitors(this, startDate, endDate);
 		return visitors.size();
+	}
+	
+	public boolean isDBConSet() {
+		if (dbService == null) {
+			return false;
+		} else {
+			return true;
+		}	
 	}
 }

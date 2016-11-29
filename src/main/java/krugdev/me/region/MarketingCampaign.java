@@ -2,14 +2,28 @@ package krugdev.me.region;
 
 import java.time.LocalDate;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+
+@Entity
 public class MarketingCampaign {
-	
+	@Id
+	@GeneratedValue
+	private int id;
 	private LocalDate startDate;		
 	private LocalDate endDate;
+	@ManyToOne(cascade = CascadeType.MERGE)
 	private Region region;
 	
 	private String name;
 	private double targetMultiplier;
+	
+	// required by JPA
+	protected MarketingCampaign() {}
 	
 	public static class Builder{
 		private LocalDate startDate;		

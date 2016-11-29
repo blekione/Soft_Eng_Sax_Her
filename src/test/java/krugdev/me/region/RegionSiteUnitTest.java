@@ -18,7 +18,7 @@ import krugdev.me.siteService.Site;
 @RunWith(JUnitParamsRunner.class)
 public class RegionSiteUnitTest {
 
-	private static final SiteType ANY_TYPE = SiteType.GARDEN;
+	private static final RegionSiteType ANY_TYPE = RegionSiteType.GARDEN;
 	LocalDate END_OF_THE_YEAR_DATE = LocalDate.of(2016, 12, 31);
 	LocalDate START_OF_THE_YEAR_DATE = LocalDate.of(2016, 1, 1);
 	Site ANY_SITE = mock(Site.class);
@@ -27,7 +27,7 @@ public class RegionSiteUnitTest {
 	
 	@Test
 	public void builderShoudlBuildSiteWithDefaultValues() {
-		SiteRating defaultRating = SiteRating.BRONZE;
+		RegionSiteRating defaultRating = RegionSiteRating.BRONZE;
 		int defaultVisitorsTarget = 1000;
 		RegionSite regionSite = builder.build();
 		
@@ -41,12 +41,12 @@ public class RegionSiteUnitTest {
 	}
 	
 	public Object[] getRatings() {
-		return new SiteRating[] {SiteRating.BRONZE, SiteRating.SILVER, SiteRating.GOLD};
+		return new RegionSiteRating[] {RegionSiteRating.BRONZE, RegionSiteRating.SILVER, RegionSiteRating.GOLD};
 	}
 	
 	@Test
 	@Parameters(method = "getRatings")
-	public void buliderShouldBuildRegionSiteWithSetRating(SiteRating rating) {
+	public void buliderShouldBuildRegionSiteWithSetRating(RegionSiteRating rating) {
 		RegionSite regionSite = builder.rating(rating).build();
 		assertEquals(rating, regionSite.getRating());
 	}
@@ -123,7 +123,7 @@ public class RegionSiteUnitTest {
 		when(ANY_SITE.getVisitorsCountForPeriod(START_OF_THE_YEAR_DATE, END_OF_THE_YEAR_DATE))
 			.thenReturn(bronzeVisitorsCount);
 		RegionSite evaluatedSite = regionSite.evaluateAtTheEndOfTheYear(END_OF_THE_YEAR_DATE);
-		assertEquals(SiteRating.BRONZE, evaluatedSite.getRating());
+		assertEquals(RegionSiteRating.BRONZE, evaluatedSite.getRating());
 	}
 	
 	public Object[] getSilverCount() {
@@ -137,7 +137,7 @@ public class RegionSiteUnitTest {
 		when(ANY_SITE.getVisitorsCountForPeriod(START_OF_THE_YEAR_DATE, END_OF_THE_YEAR_DATE))
 			.thenReturn(silverVisitorsCount);
 		RegionSite evaluatedSite = regionSite.evaluateAtTheEndOfTheYear(END_OF_THE_YEAR_DATE);
-		assertEquals(SiteRating.SILVER, evaluatedSite.getRating());
+		assertEquals(RegionSiteRating.SILVER, evaluatedSite.getRating());
 	}
 	
 	public Object[] getGoldCount() {
@@ -151,7 +151,7 @@ public class RegionSiteUnitTest {
 		when(ANY_SITE.getVisitorsCountForPeriod(START_OF_THE_YEAR_DATE, END_OF_THE_YEAR_DATE))
 			.thenReturn(goldVisitorsCount);
 		RegionSite evaluatedSite = regionSite.evaluateAtTheEndOfTheYear(END_OF_THE_YEAR_DATE);
-		assertEquals(SiteRating.GOLD, evaluatedSite.getRating());
+		assertEquals(RegionSiteRating.GOLD, evaluatedSite.getRating());
 	}
 	
 	public Object[] getCountLessThanTarget() {

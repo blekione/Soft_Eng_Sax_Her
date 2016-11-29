@@ -5,14 +5,66 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
+
+@Entity
+@NamedQuery(
+		name = "findRegionByName",
+		query= "Select r from Region r where r.name = :name")
 public class Region {
-	private RegionName name;
-	private Collection<RegionSite> regionSites = new HashSet<>();
-	private List<MarketingCampaign> campaigns = new ArrayList<>();
+	@Id
+	@GeneratedValue
+	private int id;
+	private String name;
+	@OneToMany(mappedBy = "region", fetch = FetchType.EAGER)
+	private Set<RegionSite> regionSites;
+	@OneToMany(mappedBy = "region", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+	@Fetch(FetchMode.SELECT)
+	private List<MarketingCampaign> campaigns;
 	
-	public Region(RegionName name) {
+	@Transient
+	RegionDBService dbService;
+	
+	// required by JPA
+	protected Region() {}
+	
+	private Region(String name, RegionDBService dbService) {
 		this.name = name;
+		regionSites = new HashSet<>();
+		campaigns = new ArrayList<>();
+		setDbService(dbService);
+	}
+	
+	public static Region instanceOf(String name, RegionDBService dbService) {
+		Region region;
+		Optional<Region> optionalSite = dbService.getEntity(name);
+		if (optionalSite.isPresent()) {
+			region = optionalSite.get();
+			region.setDbService(dbService);
+		} else {
+			region = new Region(name, dbService);
+			dbService.persist(region);
+		}
+		return region;
+	}
+
+
+	private void setDbService(RegionDBService dbService) {
+		this.dbService = dbService;
 	}
 
 	public void tagSites(LocalDate endDate) {
@@ -20,9 +72,13 @@ public class Region {
 			throw new IllegalArgumentException("\'endDate\' need to be last day of the year"
 					+ " and it is [" + endDate.toString() + "].");
 		} 
-		Collection<RegionSite> evaluatedRegionSites = new HashSet<>();
+		
+		Set<RegionSite> evaluatedRegionSites = new HashSet<>();
 		regionSites.stream().forEach(v -> {
-			evaluatedRegionSites.add(v.evaluateAtTheEndOfTheYear(endDate));
+			RegionSite newRegion = v.evaluateAtTheEndOfTheYear(endDate);
+			evaluatedRegionSites.add(newRegion);
+			dbService.persist(newRegion);
+			dbService.remove(v);
 		});
 		regionSites = evaluatedRegionSites;
 	}
@@ -57,7 +113,7 @@ public class Region {
 	}
 	
 	private List<RegionSite> getSitesNotInLastCampaign() {
-		List<RegionSite> sitesNotInLastCampaign = new ArrayList<>();
+		List<RegionSite> sitesNotInLastCampaign = new ArrayList<>();	
 		regionSites.stream().forEach(v -> {
 			if(!v.getLastMarketingCampaign().equals(getLastMarketingCampaign())) {
 				sitesNotInLastCampaign.add(v);
@@ -68,6 +124,7 @@ public class Region {
 
 	public void addMarketingCampaign(MarketingCampaign campaign) {
 		campaigns.add(campaign);
+		dbService.persist(campaign);
 	}
 
 	public Collection<MarketingCampaign> getMarketingCampaigns() {
@@ -78,24 +135,28 @@ public class Region {
 		return campaigns.get(campaigns.size()-1);
 	}
 	
-	public RegionName getName() {
+	public String getName() {
 		return name;
 	}
 
-	public void addSite(RegionSite site) {
-		regionSites.add(site);
+	public void addSite(RegionSite regionSite) {
+		dbService.persist(regionSite);
+		regionSites.add(regionSite);
 	}
 	
-	public Collection<RegionSite> getSites() {
+	@OneToMany
+	public Set<RegionSite> getSites() {
 		return regionSites;
 	}
 
 	public void removeSite(RegionSite regionSite) {
 		regionSites.remove(regionSite);
+		dbService.remove(regionSite);
 	}
 	
 	public void replaceSite(RegionSite oldSite, RegionSite newSite) {
-		regionSites.remove(oldSite);
-		regionSites.add(newSite);
+		addSite(newSite);	
+		removeSite(oldSite);
 	}
+
 }

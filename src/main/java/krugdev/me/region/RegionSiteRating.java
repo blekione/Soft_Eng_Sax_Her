@@ -1,6 +1,6 @@
 package krugdev.me.region;
 
-public enum SiteRating {
+public enum RegionSiteRating {
 	BRONZE, SILVER, GOLD;
 
 }

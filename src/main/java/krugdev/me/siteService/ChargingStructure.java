@@ -92,9 +92,9 @@ public class ChargingStructure {
 		this.familyChildNoMember = builder.familyChildNoMember;
 	}
 
-	public BigDecimal getPrice(Visitor visitor){
-		if (visitor.isMember()) {
-			switch(visitor.getType()) {
+	public BigDecimal getPrice(VisitorType visitorType, boolean member){
+		if (member) {
+			switch(visitorType) {
 			case CHILD: return childMember; 
 			case ADULT_FAMILY: return familyAdultMember;
 			case CHILD_FAMILY: return familyChildMember;
@@ -102,7 +102,7 @@ public class ChargingStructure {
 			default: return adultMember;
 			}
 		} else {
-			switch(visitor.getType()) {
+			switch(visitorType) {
 			case CHILD: return childNoMember;
 			case ADULT_FAMILY: return familyAdultNoMember;
 			case CHILD_FAMILY: return familyChildNoMember;

@@ -1,5 +1,5 @@
 package krugdev.me.region;
 
-public enum SiteType {
+public enum RegionSiteType {
 	BUILDING, GARDEN, MONUMENT;
 }

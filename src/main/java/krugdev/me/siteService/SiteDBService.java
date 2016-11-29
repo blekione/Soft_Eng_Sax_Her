@@ -12,8 +12,8 @@ import javax.persistence.Query;
 
 public class SiteDBService {
 	
-	EntityManagerFactory emf;
-	EntityManager em;
+	private EntityManagerFactory emf;
+	private EntityManager em;
 	
 	public SiteDBService() {
 		emf = Persistence.createEntityManagerFactory("sax_her");
@@ -27,7 +27,7 @@ public class SiteDBService {
 		em.close();
 	}
 
-	public <T> Optional<T> getSite(String siteName) {
+	public <T> Optional<T> getEntity(String siteName) {
 		em = emf.createEntityManager();
 		Query query = em.createNamedQuery("findSiteByName");
 		query.setParameter("name", siteName);
@@ -42,10 +42,6 @@ public class SiteDBService {
 			em.close();
 		}
 		return optionalSite;		
-	}
-	
-	public void close() {
-		emf.close();
 	}
 
 	public void update(Site site) {
@@ -72,5 +68,9 @@ public class SiteDBService {
 		@SuppressWarnings("unchecked")
 		List<Visitor> visitors = query.getResultList();
 		return visitors;
+	}
+	
+	public void close() {
+		emf.close();
 	}
 }

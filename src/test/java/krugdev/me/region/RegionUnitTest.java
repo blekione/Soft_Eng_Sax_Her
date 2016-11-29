@@ -17,8 +17,9 @@ import junitparams.Parameters;
 @RunWith(JUnitParamsRunner.class)
 public class RegionUnitTest {
 
-	private static final RegionName ANY_REGION_NAME = RegionName.LONDON;
-	Region region = new Region(ANY_REGION_NAME);
+	private static final String ANY_REGION_NAME = "London";
+	private RegionDBService dbService = mock(RegionDBService.class);
+	Region region = Region.instanceOf(ANY_REGION_NAME, dbService);
 	RegionSite ANY_REGION_SITE = mock(RegionSite.class);
 	LocalDate END_OF_THE_YEAR_DATE = LocalDate.of(2016, 12, 31);
 	MarketingCampaign ANY_MARKETING_CAMPAIGN = mock(MarketingCampaign.class);
