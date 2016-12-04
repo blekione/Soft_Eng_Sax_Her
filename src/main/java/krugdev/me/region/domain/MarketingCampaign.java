@@ -1,13 +1,19 @@
-package krugdev.me.region;
+package krugdev.me.region.domain;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 @Entity
 public class MarketingCampaign {
@@ -16,11 +22,13 @@ public class MarketingCampaign {
 	private int id;
 	private LocalDate startDate;		
 	private LocalDate endDate;
-	@ManyToOne(cascade = CascadeType.MERGE)
-	private Region region;
 	
 	private String name;
 	private double targetMultiplier;
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+	@JoinTable(name = "CampaignSites")
+	@Fetch(FetchMode.SELECT)
+	private Set<RegionSite> regionSites;
 	
 	// required by JPA
 	protected MarketingCampaign() {}
@@ -28,14 +36,13 @@ public class MarketingCampaign {
 	public static class Builder{
 		private LocalDate startDate;		
 		private LocalDate endDate;
-		private final Region region;
 		
 		private String name = "unknown";
 		private double targetMultiplier = 1.0d;
+		private Set<RegionSite> regionSites = new HashSet<>();
 		
-		public Builder(LocalDate startDate, LocalDate endDate, Region region) {
+		public Builder(LocalDate startDate, LocalDate endDate) {
 			setCampaignDates(startDate, endDate);
-			this.region = region;
 		}
 		
 		private void setCampaignDates(LocalDate campaignStartDate, LocalDate campaignEndDate) {
@@ -70,14 +77,19 @@ public class MarketingCampaign {
 			this.targetMultiplier = targetMultiplier;
 			return this;
 		}
+		
+		public Builder regionSites(Set<RegionSite> regionSites) {
+			this.regionSites = regionSites;
+			return this;
+		}
 	}	
 	
 	private MarketingCampaign(Builder builder) {
 		this.startDate = builder.startDate;
 		this.endDate = builder.endDate;
-		this.region = builder.region;
 		this.name = builder.name;
 		this.targetMultiplier = builder.targetMultiplier;
+		this.regionSites = builder.regionSites;
 	}
 
 	public LocalDate getStartDate() {
@@ -88,15 +100,21 @@ public class MarketingCampaign {
 		return endDate;
 	}
 
-	public Region getRegion() {
-		return region;
-	}
-
 	public String getName() {
 		return name;
 	}
 
 	public double getTargetMultiplier() {
 		return targetMultiplier;
+	}
+	
+	public Set<RegionSite> getRegionSites() {
+		return regionSites;
+	}
+
+	@Override
+	public String toString() {
+		return "MarketingCampaign [startDate=" + startDate.toString() + ", endDate=" + endDate.toString() + ", name=" + name
+				+ ", targetMultiplier=" + targetMultiplier + ", regionSitesSize=" + regionSites.size() + "]";
 	}
 }

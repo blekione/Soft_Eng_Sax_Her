@@ -1,4 +1,4 @@
-package krugdev.me.siteService;
+package krugdev.me.siteService.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,7 +12,7 @@ import javax.persistence.NamedQuery;
 
 @Entity
 @NamedQuery(
-		name = "findSiteVisitorsByPeriod",
+		name = "Visitor.findSiteVisitorsByPeriod",
 		query= "Select v from Visitor v "
 				+ "where v.visitedSite = :site "
 				+ "and v.visitDate >= :startDate "

@@ -1,24 +1,20 @@
 package krugdev.me.siteService;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-
-import javax.persistence.Tuple;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
+import krugdev.me.siteService.domain.ChargingStructure;
+import krugdev.me.siteService.domain.VisitorType;
 
 @RunWith(JUnitParamsRunner.class)
 public class ChargingStructureBuilderTest {
 	
-	private static final LocalDate ANY_DATE = LocalDate.now();
-	private static final Site ANY_SITE = mock(Site.class);
 
 	public Object[] getVisitors() {
 		return new VisitorType[] {

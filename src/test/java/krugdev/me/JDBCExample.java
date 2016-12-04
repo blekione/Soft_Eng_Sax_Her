@@ -1,25 +1,26 @@
-package krugdev.me.region;
+package krugdev.me;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 public class JDBCExample {
 	// JDBC driver name and database URL
-	   static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";  
-	   static final String DB_URL = "jdbc:mysql://0.0.0.0:6603/sax_her";
+	   static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";  
+	   static final String DB_URL = "jdbc:mysql://0.0.0.0:6603/sax_her_test?useSSL=false";
 
 	   //  Database credentials
 	   static final String USER = "root";
 	   static final String PASS = "mypassword";
 	   
-	   public static void deleteTable() {
+	   public static void deleteTable(List<String> tablesNames) {
 		   Connection conn = null;
 		   Statement stmt = null;
 		   try{
 		      //STEP 2: Register JDBC driver
-		      Class.forName("com.mysql.jdbc.Driver");
+		      Class.forName("com.mysql.cj.jdbc.Driver");
 
 		      //STEP 3: Open a connection
 //		      System.out.println("Connecting to a selected database...");
@@ -30,16 +31,10 @@ public class JDBCExample {
 //		      System.out.println("Deleting table in given database...");
 		      stmt = conn.createStatement();
 		      
-		      String sql = "DROP TABLE RegionSiteCampaigns";
-		 
-		      stmt.executeUpdate(sql);
-		      
-		      sql = "DROP TABLE RegionSite";
-		      
-		      stmt.executeUpdate(sql);
-		      
-		      sql = "DROP TABLE MarketingCampaign";
-		      stmt.executeUpdate(sql);
+		      for (String tableName : tablesNames) {
+		    	  String sql = "DELETE FROM " + tableName;
+		 		  stmt.executeUpdate(sql);
+		      }
 //		      System.out.println("Table  deleted in given database...");
 		   }catch(SQLException se){
 		      //Handle errors for JDBC

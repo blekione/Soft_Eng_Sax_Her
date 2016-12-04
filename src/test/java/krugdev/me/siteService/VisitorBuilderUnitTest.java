@@ -7,6 +7,10 @@ import java.time.LocalDate;
 
 import org.junit.Test;
 
+import krugdev.me.siteService.domain.Site;
+import krugdev.me.siteService.domain.Visitor;
+import krugdev.me.siteService.domain.VisitorType;
+
 public class VisitorBuilderUnitTest {
 	
 	private static final LocalDate ANY_VISIT_DATE = LocalDate.now();
